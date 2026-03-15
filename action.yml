@@ -1,0 +1,49 @@
+name: action-release-bump-version
+description: Replaces version values on lines marked with update-automation markers.
+
+inputs:
+  version:
+    description: Semantic version without prefix, e.g. 1.2.3
+    required: true
+  tag-prefix:
+    description: Prefix used for replacement-value default, e.g. v
+    required: false
+    default: "v"
+  replacement-value:
+    description: Explicit replacement value. Defaults to <tag-prefix><version>
+    required: false
+    default: ""
+  working-directory:
+    description: Directory where files should be scanned
+    required: false
+    default: "."
+  marker:
+    description: Marker token that identifies replaceable lines
+    required: false
+    default: "update-automation:version"
+  config-file:
+    description: Optional YAML config file relative to working-directory
+    required: false
+    default: ".github/release-automation.yml"
+  include-glob:
+    description: Optional comma-separated glob-like prefixes. Empty means recursive scan.
+    required: false
+    default: ""
+  dry-run:
+    description: If true, reports planned changes without writing files
+    required: false
+    default: "false"
+
+outputs:
+  updated-files:
+    description: JSON array with updated file paths
+  updated-count:
+    description: Number of updated files
+  changed:
+    description: true if at least one file changed
+  replacement-value:
+    description: Value that was written on marked lines
+
+runs:
+  using: node24
+  main: index.js

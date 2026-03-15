@@ -135,6 +135,41 @@ function replaceMarkedLine(line, marker, replacementValue) {
 
   const beforeMarker = line.slice(0, markerIndex);
   const afterMarker = line.slice(markerIndex);
+
+  // Marker format supports delimiter-driven replacements, e.g.:
+  // - update-automation:@  => replace token after last '@' before marker
+  // - update-automation::  => replace token after last ':' before marker
+  // Legacy update-automation:version keeps semver-only replacement behavior.
+  const markerDirective = marker.startsWith("update-automation:")
+    ? marker.slice("update-automation:".length)
+    : "version";
+
+  if (markerDirective && markerDirective !== "version") {
+    const delimiter = markerDirective;
+    const delimiterIndex = beforeMarker.lastIndexOf(delimiter);
+    if (delimiterIndex < 0) {
+      return line;
+    }
+
+    let tokenStart = delimiterIndex + delimiter.length;
+    while (tokenStart < beforeMarker.length && /\s/.test(beforeMarker[tokenStart])) {
+      tokenStart += 1;
+    }
+
+    const commentIndex = beforeMarker.indexOf("#", tokenStart);
+    let tokenEnd = commentIndex >= 0 ? commentIndex : beforeMarker.length;
+    while (tokenEnd > tokenStart && /\s/.test(beforeMarker[tokenEnd - 1])) {
+      tokenEnd -= 1;
+    }
+
+    if (tokenStart >= tokenEnd) {
+      return line;
+    }
+
+    const updatedBefore = `${beforeMarker.slice(0, tokenStart)}${replacementValue}${beforeMarker.slice(tokenEnd)}`;
+    return `${updatedBefore}${afterMarker}`;
+  }
+
   const tokenPattern = /v?\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?/g;
   const matches = [...beforeMarker.matchAll(tokenPattern)];
 

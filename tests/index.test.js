@@ -57,6 +57,54 @@ test("replaceMarkedLine keeps line when no version token exists before marker", 
   );
 });
 
+test("replaceMarkedLine updates token after @ delimiter marker", () => {
+  const line = "uses: saltyblu/action-release-version-bump@feature-branch-1 # update-automation:@";
+  assert.equal(
+    replaceMarkedLine(line, "update-automation:@", "v1.2.3"),
+    "uses: saltyblu/action-release-version-bump@v1.2.3 # update-automation:@"
+  );
+});
+
+test("replaceMarkedLine updates token after : delimiter marker", () => {
+  const line = "image: ghcr.io/acme/app:feature-branch-1 # update-automation::";
+  assert.equal(
+    replaceMarkedLine(line, "update-automation::", "v1.2.3"),
+    "image: ghcr.io/acme/app:v1.2.3 # update-automation::"
+  );
+});
+
+test("replaceMarkedLine keeps line when delimiter from marker is missing", () => {
+  const line = "uses: saltyblu/action-release-version-bump # update-automation:@";
+  assert.equal(
+    replaceMarkedLine(line, "update-automation:@", "v1.2.3"),
+    line
+  );
+});
+
+test("replaceMarkedLine keeps line when token after delimiter is empty", () => {
+  const line = "uses: saltyblu/action-release-version-bump@   # update-automation:@";
+  assert.equal(
+    replaceMarkedLine(line, "update-automation:@", "v1.2.3"),
+    line
+  );
+});
+
+test("replaceMarkedLine handles delimiter marker without comment hash", () => {
+  const line = "uses: saltyblu/action-release-version-bump@feature-branch update-automation:@";
+  assert.equal(
+    replaceMarkedLine(line, "update-automation:@", "v1.2.3"),
+    "uses: saltyblu/action-release-version-bump@v1.2.3 update-automation:@"
+  );
+});
+
+test("replaceMarkedLine handles spaces after delimiter", () => {
+  const line = "tag:    feature-branch # update-automation::";
+  assert.equal(
+    replaceMarkedLine(line, "update-automation::", "v1.2.3"),
+    "tag:    v1.2.3 # update-automation::"
+  );
+});
+
 test("updateContent preserves CRLF and updates marked lines", () => {
   const input = "version=v1.2.3 # update-automation:version\r\nother=line\r\n";
   const result = updateContent(input, "update-automation:version", "v1.2.4");

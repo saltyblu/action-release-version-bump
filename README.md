@@ -1,4 +1,4 @@
-# action-release-bump-version
+# action-release-version-bump
 
 GitHub Action that updates version strings on lines marked with an explicit automation marker.
 

@@ -1,4 +1,4 @@
-name: action-release-bump-version
+name: action-release-version-bump
 description: Replaces version values on lines marked with update-automation markers.
 
 inputs:
